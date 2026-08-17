@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#071d16">
+    <title>Pizarra Táctica de Fútbol Pro</title>
+    <link rel="stylesheet" href="tablero.css">
+</head>
+<body>
+    <main class="app">
+        <header class="encabezado">
+            <div>
+                <p class="eyebrow">Pizarra Táctica Profesional</p>
+                <h1 id="titulo-esquema">Alineación Táctica</h1>
+            </div>
+            <div class="marcador-cambios">
+                <span>Cambios Realizados:</span>
+                <span class="badge-cambios" id="contador-cambios">0 / 5</span>
+            </div>
+        </header>
+
+        <div class="contenido">
+            <!-- Cancha de fútbol -->
+            <section class="marco-cancha" aria-label="Cancha de fútbol">
+                <div class="cancha" id="cancha">
+                    <div class="linea"></div>
+                    <div class="circulo-central"></div>
+                    <div class="area superior"></div>
+                    <div class="area inferior"></div>
+                    <div class="porteria superior"></div>
+                    <div class="porteria inferior"></div>
+                </div>
+            </section>
+
+            <!-- Panel de Control y Banca -->
+            <aside class="panel">
+                <!-- Gestión de Formación y Edición -->
+                <div class="seccion-card">
+                    <h2>Configuración Táctica</h2>
+                    
+                    <div class="campo-grupo">
+                        <label for="selectFormacion">Estructura de Juego</label>
+                        <select id="selectFormacion">
+                            <option value="4-3-3">4-3-3 (Ofensiva con extremos)</option>
+                            <option value="4-4-2">4-4-2 (Equilibrada clásica)</option>
+                            <option value="4-2-3-1">4-2-3-1 (Doble pivote y mediapunta)</option>
+                            <option value="3-5-2">3-5-2 (Carrileros y 3 centrales)</option>
+                            <option value="5-3-2">5-3-2 (Bloque defensivo sólido)</option>
+                            <option value="4-1-4-1">4-1-4-1 (Pivote defensivo y presión)</option>
+                        </select>
+                    </div>
+
+                    <form id="formulario">
+                        <div class="campo-grupo">
+                            <label for="nombreJugador">Editar Jugador Seleccionado</label>
+                            <input id="nombreJugador" maxlength="20" autocomplete="off" disabled placeholder="Haz clic en un jugador">
+                        </div>
+                        <div class="campo-grupo">
+                            <label for="posicionJugador">Posición Táctica</label>
+                            <input id="posicionJugador" maxlength="15" autocomplete="off" disabled placeholder="Ej. Extremo Der.">
+                        </div>
+                        <div class="campo-grupo checkbox-grupo" style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                            <input type="checkbox" id="checkCapitan" disabled style="cursor: pointer;">
+                            <label for="checkCapitan" style="cursor: pointer; font-size: 0.9rem;">👑 Designar Capitán</label>
+                        </div>
+                        <div class="acciones" style="margin-top: 15px;">
+                            <button id="guardar" type="submit" disabled>Guardar Nombre y Posición</button>
+                            <button id="btnSustituir" class="boton-sub" type="button" disabled>Realizar Cambio (0/5)</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Banca de Suplentes (Jugadores 12 al 24) -->
+                <div class="seccion-card">
+                    <h2>
+                        Banca de Suplentes 
+                        <span style="font-size: .75rem; color: var(--muted);">(13 Disponibles)</span>
+                    </h2>
+                    <div class="banca-grid" id="bancaGrid">
+                        <!-- Generado por JS -->
+                    </div>
+                </div>
+
+                <div class="acciones">
+                    <button class="secundario" id="restablecer" type="button">Restablecer Formación y Cambios</button>
+                </div>
+                <div class="estado" id="estado">Los cambios de nombres y posiciones se guardan automáticamente.</div>
+            </aside>
+        </div>
+    </main>
+
+    <script src="alineacion.js"></script>
+</body>
+</html>
