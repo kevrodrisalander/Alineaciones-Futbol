@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#071d16">
     <title>Pizarra Táctica de Fútbol Pro</title>
-    <link rel="stylesheet" href="tablero.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/cancha.css">
+    <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
     <main class="app">
@@ -60,14 +64,11 @@
                             <label for="posicionJugador">Posición Táctica</label>
                             <input id="posicionJugador" maxlength="15" autocomplete="off" disabled placeholder="Ej. Extremo Der.">
                         </div>
-                        <div class="campo-grupo checkbox-grupo" style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
-                            <input type="checkbox" id="checkCapitan" disabled style="cursor: pointer;">
-                            <label for="checkCapitan" style="cursor: pointer; font-size: 0.9rem;">👑 Designar Capitán</label>
-                        </div>
-                        <div class="acciones" style="margin-top: 15px;">
+                        <div class="acciones acciones-formulario">
                             <button id="guardar" type="submit" disabled>Guardar Nombre y Posición</button>
                             <button id="btnSustituir" class="boton-sub" type="button" disabled>Realizar Cambio (0/5)</button>
                         </div>
+                        <button id="btnCapitan" class="btn-capitan" type="button" disabled>Asignar Capitán</button>
                     </form>
                 </div>
 
@@ -75,7 +76,7 @@
                 <div class="seccion-card">
                     <h2>
                         Banca de Suplentes 
-                        <span style="font-size: .75rem; color: var(--muted);">(13 Disponibles)</span>
+                        <span class="banca-disponibles">(13 Disponibles)</span>
                     </h2>
                     <div class="banca-grid" id="bancaGrid">
                         <!-- Generado por JS -->

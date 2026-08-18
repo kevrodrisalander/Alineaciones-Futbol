@@ -1,0 +1,87 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 20% 0%, rgba(45, 151, 105, .22), transparent 35rem),
+        linear-gradient(145deg, #061812, #0a2119 60%, #07150f);
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: -.04em;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: .8rem;
+    font-weight: 750;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, .17);
+    border-radius: 10px;
+    outline: none;
+    color: var(--text);
+    background: #0a1e17;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245, 196, 81, .13);
+}
+
+button {
+    min-height: 42px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 10px;
+    color: var(--accent-dark);
+    background: var(--accent);
+    font-weight: 850;
+    cursor: pointer;
+    transition: filter .15s, transform .15s;
+}
+
+button:hover { filter: brightness(1.08); }
+button:active { transform: translateY(1px); }
+button:disabled { cursor: not-allowed; filter: grayscale(.5); opacity: .45; }
+
+.secundario {
+    color: var(--text);
+    background: var(--surface-2);
+}
+
+.boton-sub {
+    color: white;
+    background: var(--sub-in);
+}
+
+.btn-capitan {
+    width: 100%;
+    margin-top: .5rem;
+    color: #000;
+    background: #f59e0b;
+}
+
+.marca-capitan {
+    color: #f59e0b;
+    font-weight: 800;
+}

@@ -122,6 +122,7 @@
     let seleccionadoBanca = null;
     let arrastre = null;
     let tickFrame = null;
+    let almacenamientoInvalido = false;
 
     // DOM
     const cancha = document.getElementById("cancha");
@@ -132,23 +133,11 @@
     const posicionInput = document.getElementById("posicionJugador");
     const guardarBtn = document.getElementById("guardar");
     const btnSustituir = document.getElementById("btnSustituir");
+    const btnCapitan = document.getElementById("btnCapitan");
     const restablecerBtn = document.getElementById("restablecer");
     const contadorCambios = document.getElementById("contador-cambios");
     const estado = document.getElementById("estado");
     const tituloEsquema = document.getElementById("titulo-esquema");
-
-    // Crear botón dinámico de Capitán en el panel
-    const btnCapitan = document.createElement("button");
-    btnCapitan.id = "btnCapitan";
-    btnCapitan.type = "button";
-    btnCapitan.className = "btn";
-    btnCapitan.style.width = "100%";
-    btnCapitan.style.marginTop = "0.5rem";
-    btnCapitan.style.background = "#f59e0b";
-    btnCapitan.style.color = "#000";
-    btnCapitan.textContent = "Hacer Capitán";
-    btnCapitan.disabled = true;
-    formulario.appendChild(btnCapitan);
 
     const guardarStorage = () => {
         const data = {
@@ -165,19 +154,155 @@
         }
     };
 
+    const limpiarTexto = (valor, alternativa, maximo) => {
+        if (typeof valor !== "string") return alternativa;
+        return valor.trim().slice(0, maximo) || alternativa;
+    };
+
+    const validarDatosGuardados = (data) => {
+        if (!data || typeof data !== "object" || !Array.isArray(data.jugadores)) {
+            return null;
+        }
+
+        if (data.jugadores.length !== PLANTILLA_INICIAL.length) return null;
+
+        const dorsales = new Set();
+        const jugadoresValidos = [];
+
+        for (const jugador of data.jugadores) {
+            if (!jugador || typeof jugador !== "object") return null;
+
+            const numero = Number(jugador.numero);
+            if (!Number.isInteger(numero) || numero < 1 || numero > 99 || dorsales.has(numero)) {
+                return null;
+            }
+            dorsales.add(numero);
+
+            const x = Number(jugador.x);
+            const y = Number(jugador.y);
+            jugadoresValidos.push({
+                numero,
+                nombre: limpiarTexto(jugador.nombre, `Jugador ${numero}`, 20),
+                pos: limpiarTexto(jugador.pos, "Sin posición", 15),
+                esTitular: jugador.esTitular === true,
+                esCapitan: jugador.esCapitan === true,
+                puestoId: typeof jugador.puestoId === "string" ? jugador.puestoId : null,
+                ...(Number.isFinite(x) ? { x: Math.max(6, Math.min(94, x)) } : {}),
+                ...(Number.isFinite(y) ? { y: Math.max(5, Math.min(95, y)) } : {})
+            });
+        }
+
+        const titulares = jugadoresValidos.filter(jugador => jugador.esTitular);
+        if (titulares.length !== 11) return null;
+
+        const capitanes = jugadoresValidos.filter(jugador => jugador.esCapitan);
+        if (capitanes.length !== 1 || !capitanes[0].esTitular) {
+            jugadoresValidos.forEach(jugador => { jugador.esCapitan = false; });
+            titulares[0].esCapitan = true;
+        }
+
+        const formacion = Object.hasOwn(FORMACIONES, data.formacionActual)
+            ? data.formacionActual
+            : "4-3-3";
+
+        const historial = Array.isArray(data.historialCambios)
+            ? data.historialCambios
+                .filter(cambio => {
+                    if (!cambio || typeof cambio !== "object") return false;
+                    return Number.isInteger(cambio.sale)
+                        && Number.isInteger(cambio.entra)
+                        && cambio.sale !== cambio.entra
+                        && dorsales.has(cambio.sale)
+                        && dorsales.has(cambio.entra);
+                })
+                .slice(0, MAX_CAMBIOS)
+                .map(cambio => ({
+                    sale: cambio.sale,
+                    entra: cambio.entra,
+                    puestoId: typeof cambio.puestoId === "string" ? cambio.puestoId : null
+                }))
+            : [];
+
+        const contador = Number.isInteger(data.cambiosRealizados)
+            ? Math.max(0, Math.min(MAX_CAMBIOS, data.cambiosRealizados))
+            : 0;
+
+        return {
+            jugadores: jugadoresValidos,
+            formacionActual: formacion,
+            cambiosRealizados: Math.max(contador, historial.length),
+            historialCambios: historial
+        };
+    };
+
     const cargarStorage = () => {
         try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-            if (data) {
-                jugadores = data.jugadores || jugadores;
-                formacionActual = data.formacionActual || "4-3-3";
-                cambiosRealizados = data.cambiosRealizados || 0;
-                historialCambios = data.historialCambios || [];
+            const contenido = localStorage.getItem(STORAGE_KEY);
+            if (!contenido) return;
+
+            const data = validarDatosGuardados(JSON.parse(contenido));
+            if (!data) {
+                almacenamientoInvalido = true;
+                return;
             }
-        } catch(e) {}
+
+            jugadores = data.jugadores;
+            formacionActual = data.formacionActual;
+            cambiosRealizados = data.cambiosRealizados;
+            historialCambios = data.historialCambios;
+        } catch (e) {
+            almacenamientoInvalido = true;
+        }
+    };
+
+    const normalizarPuestosTacticos = () => {
+        const idsPuestos = FORMACIONES[formacionActual].map(puesto => puesto.id);
+        const titulares = jugadores.filter(jugador => jugador.esTitular);
+        const puestosActuales = titulares.map(jugador => jugador.puestoId);
+        const asignacionValida = titulares.length === 11
+            && puestosActuales.every(id => idsPuestos.includes(id))
+            && new Set(puestosActuales).size === 11;
+
+        if (asignacionValida) {
+            jugadores
+                .filter(jugador => !jugador.esTitular)
+                .forEach(jugador => { jugador.puestoId = null; });
+            return;
+        }
+
+        // Migración para alineaciones guardadas antes de incorporar puestos estables.
+        jugadores.forEach(jugador => { jugador.puestoId = null; });
+        idsPuestos.forEach(id => {
+            const titularOriginal = jugadores.find(jugador => String(jugador.numero) === id);
+            if (titularOriginal) titularOriginal.puestoId = id;
+        });
+
+        historialCambios.forEach(cambio => {
+            const sale = jugadores.find(jugador => jugador.numero === cambio.sale);
+            const entra = jugadores.find(jugador => jugador.numero === cambio.entra);
+            if (!sale || !entra || !sale.puestoId) return;
+
+            entra.puestoId = sale.puestoId;
+            sale.puestoId = null;
+        });
+
+        const puestosOcupados = new Set(
+            titulares.map(jugador => jugador.puestoId).filter(Boolean)
+        );
+        const puestosLibres = idsPuestos.filter(id => !puestosOcupados.has(id));
+
+        titulares.forEach(jugador => {
+            if (!jugador.puestoId) jugador.puestoId = puestosLibres.shift();
+        });
+
+        jugadores
+            .filter(jugador => !jugador.esTitular)
+            .forEach(jugador => { jugador.puestoId = null; });
     };
 
     const asignarCapitan = (jugador) => {
+        if (!jugador.esTitular) return;
+
         jugadores.forEach(j => j.esCapitan = false);
         jugador.esCapitan = true;
         estado.textContent = `${jugador.nombre} es el nuevo Capitán (C).`;
@@ -188,7 +313,7 @@
     };
 
     const renderizarBanca = () => {
-        bancaGrid.innerHTML = "";
+        bancaGrid.replaceChildren();
         const suplentes = jugadores.filter(j => !j.esTitular);
 
         suplentes.forEach(jugador => {
@@ -196,15 +321,29 @@
             item.className = `banca-item ${seleccionadoBanca === jugador ? 'seleccionado' : ''}`;
             item.dataset.numero = jugador.numero;
 
-            item.innerHTML = `
-                <div class="banca-dorsal">${jugador.numero}</div>
-                <div class="banca-info">
-                    <div class="banca-nombre">
-                        ${jugador.nombre} ${jugador.esCapitan ? '<strong style="color:#f59e0b;">(C)</strong>' : ''}
-                    </div>
-                    <div class="banca-pos">${jugador.pos}</div>
-                </div>
-            `;
+            const dorsal = document.createElement("div");
+            dorsal.className = "banca-dorsal";
+            dorsal.textContent = jugador.numero;
+
+            const info = document.createElement("div");
+            info.className = "banca-info";
+
+            const nombre = document.createElement("div");
+            nombre.className = "banca-nombre";
+            nombre.append(document.createTextNode(jugador.nombre));
+            if (jugador.esCapitan) {
+                const marcaCapitan = document.createElement("strong");
+                marcaCapitan.className = "marca-capitan";
+                marcaCapitan.textContent = " (C)";
+                nombre.append(marcaCapitan);
+            }
+
+            const posicion = document.createElement("div");
+            posicion.className = "banca-pos";
+            posicion.textContent = jugador.pos;
+
+            info.append(nombre, posicion);
+            item.append(dorsal, info);
 
             item.addEventListener("click", () => {
                 seleccionadoBanca = (seleccionadoBanca === jugador) ? null : jugador;
@@ -223,7 +362,9 @@
         const coordsDefecto = FORMACIONES[formacionActual];
 
         titulares.forEach((jugador, idx) => {
-            const def = coordsDefecto[idx] || { x: 50, y: 50, pos: "MC" };
+            const def = coordsDefecto.find(puesto => puesto.id === jugador.puestoId)
+                || coordsDefecto[idx]
+                || { x: 50, y: 50, pos: "MC" };
             
             const x = jugador.x !== undefined ? jugador.x : def.x;
             const y = jugador.y !== undefined ? jugador.y : def.y;
@@ -238,15 +379,27 @@
 
             const fueCambiado = historialCambios.some(h => h.entra === jugador.numero);
 
-            el.innerHTML = `
-                <div class="ficha">
-                    ${jugador.numero}
-                    ${fueCambiado ? '<span class="indicador-sub">▲</span>' : ''}
-                </div>
-                <div class="nombre">
-                    ${jugador.nombre} ${jugador.esCapitan ? '<span style="color:#f59e0b; font-weight:bold;">(C)</span>' : ''}
-                </div>
-            `;
+            const ficha = document.createElement("div");
+            ficha.className = "ficha";
+            ficha.append(document.createTextNode(jugador.numero));
+            if (fueCambiado) {
+                const indicador = document.createElement("span");
+                indicador.className = "indicador-sub";
+                indicador.textContent = "▲";
+                ficha.append(indicador);
+            }
+
+            const nombre = document.createElement("div");
+            nombre.className = "nombre";
+            nombre.append(document.createTextNode(jugador.nombre));
+            if (jugador.esCapitan) {
+                const marcaCapitan = document.createElement("span");
+                marcaCapitan.className = "marca-capitan";
+                marcaCapitan.textContent = " (C)";
+                nombre.append(marcaCapitan);
+            }
+
+            el.append(ficha, nombre);
 
             vincularEventosArrastre(el, jugador);
             cancha.appendChild(el);
@@ -260,12 +413,19 @@
             nombreInput.disabled = false;
             posicionInput.disabled = false;
             guardarBtn.disabled = false;
-            btnCapitan.disabled = false;
             nombreInput.value = activo.nombre;
             posicionInput.value = activo.pos;
 
-            btnCapitan.textContent = activo.esCapitan ? "Es Capitán (C)" : "Asignar Capitán";
-            btnCapitan.style.opacity = activo.esCapitan ? "0.7" : "1";
+            if (!activo.esTitular) {
+                btnCapitan.disabled = true;
+                btnCapitan.textContent = "El capitán debe ser titular";
+            } else if (activo.esCapitan) {
+                btnCapitan.disabled = true;
+                btnCapitan.textContent = "Capitán actual (C)";
+            } else {
+                btnCapitan.disabled = false;
+                btnCapitan.textContent = "Asignar Capitán";
+            }
         } else {
             nombreInput.disabled = true;
             posicionInput.disabled = true;
@@ -273,7 +433,7 @@
             btnCapitan.disabled = true;
             nombreInput.value = "";
             posicionInput.value = "";
-            btnCapitan.textContent = "Hacer Capitán";
+            btnCapitan.textContent = "Asignar Capitán";
         }
 
         const puedeSustituir = seleccionadoTitular && seleccionadoBanca && cambiosRealizados < MAX_CAMBIOS;
@@ -285,6 +445,9 @@
     const efectuarSustitucion = () => {
         if (!seleccionadoTitular || !seleccionadoBanca || cambiosRealizados >= MAX_CAMBIOS) return;
 
+        seleccionadoBanca.puestoId = seleccionadoTitular.puestoId;
+        seleccionadoTitular.puestoId = null;
+        seleccionadoBanca.pos = seleccionadoTitular.pos;
         seleccionadoTitular.esTitular = false;
         seleccionadoBanca.esTitular = true;
 
@@ -300,7 +463,8 @@
 
         historialCambios.push({
             sale: seleccionadoTitular.numero,
-            entra: seleccionadoBanca.numero
+            entra: seleccionadoBanca.numero,
+            puestoId: seleccionadoBanca.puestoId
         });
 
         cambiosRealizados++;
@@ -322,38 +486,69 @@
         return { x: limX, y: limY };
     };
 
-    const vincularEventosArrastre = (el, jugador) => {
-        el.addEventListener("click", (e) => {
-            e.stopPropagation();
-            seleccionadoTitular = (seleccionadoTitular === jugador) ? null : jugador;
-            renderizarCancha();
-            actualizarPanelFormulario();
+    const actualizarSeleccionCancha = () => {
+        cancha.querySelectorAll(".jugador").forEach(el => {
+            const numero = Number(el.dataset.numero);
+            el.classList.toggle(
+                "seleccionado",
+                seleccionadoTitular?.numero === numero
+            );
         });
+    };
 
+    const aplicarPosicionPendiente = () => {
+        if (!arrastre || arrastre.x === null || arrastre.y === null) return;
+
+        const pos = posicionarElemento(arrastre.el, arrastre.x, arrastre.y);
+        arrastre.jugador.x = pos.x;
+        arrastre.jugador.y = pos.y;
+    };
+
+    const vincularEventosArrastre = (el, jugador) => {
         el.addEventListener("pointerdown", (e) => {
             if (e.button !== 0) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const yaEstabaSeleccionado = seleccionadoTitular === jugador;
             seleccionadoTitular = jugador;
-            renderizarCancha();
+            actualizarSeleccionCancha();
             actualizarPanelFormulario();
 
             el.classList.add("arrastrando");
             el.setPointerCapture(e.pointerId);
-            arrastre = { el, jugador, pointerId: e.pointerId };
+            arrastre = {
+                el,
+                jugador,
+                pointerId: e.pointerId,
+                inicioX: e.clientX,
+                inicioY: e.clientY,
+                x: null,
+                y: null,
+                movido: false,
+                yaEstabaSeleccionado
+            };
         });
 
         el.addEventListener("pointermove", (e) => {
             if (!arrastre || arrastre.pointerId !== e.pointerId) return;
+
+            const distancia = Math.hypot(
+                e.clientX - arrastre.inicioX,
+                e.clientY - arrastre.inicioY
+            );
+
+            if (!arrastre.movido && distancia < 4) return;
+            arrastre.movido = true;
+
             const rect = cancha.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            arrastre.x = ((e.clientX - rect.left) / rect.width) * 100;
+            arrastre.y = ((e.clientY - rect.top) / rect.height) * 100;
 
             if (!tickFrame) {
                 tickFrame = requestAnimationFrame(() => {
-                    if (arrastre) {
-                        const pos = posicionarElemento(arrastre.el, x, y);
-                        arrastre.jugador.x = pos.x;
-                        arrastre.jugador.y = pos.y;
-                    }
+                    aplicarPosicionPendiente();
                     tickFrame = null;
                 });
             }
@@ -361,9 +556,25 @@
 
         const finalizarArrastre = (e) => {
             if (!arrastre || arrastre.pointerId !== e.pointerId) return;
+
+            const { movido, yaEstabaSeleccionado } = arrastre;
+
+            if (tickFrame) {
+                cancelAnimationFrame(tickFrame);
+                tickFrame = null;
+                aplicarPosicionPendiente();
+            }
+
             el.classList.remove("arrastrando");
             arrastre = null;
-            guardarStorage();
+
+            if (movido) {
+                guardarStorage();
+            } else {
+                seleccionadoTitular = yaEstabaSeleccionado ? null : jugador;
+                actualizarSeleccionCancha();
+                actualizarPanelFormulario();
+            }
         };
 
         el.addEventListener("pointerup", finalizarArrastre);
@@ -378,11 +589,12 @@
         const coords = FORMACIONES[nuevaFormacion];
         const titulares = jugadores.filter(j => j.esTitular);
 
-        titulares.forEach((jugador, idx) => {
-            if (coords[idx]) {
-                jugador.x = coords[idx].x;
-                jugador.y = coords[idx].y;
-                jugador.pos = coords[idx].pos;
+        titulares.forEach(jugador => {
+            const puesto = coords.find(coord => coord.id === jugador.puestoId);
+            if (puesto) {
+                jugador.x = puesto.x;
+                jugador.y = puesto.y;
+                jugador.pos = puesto.pos;
             }
         });
 
@@ -393,6 +605,7 @@
 
     const init = () => {
         cargarStorage();
+        normalizarPuestosTacticos();
         
         selectFormacion.value = formacionActual;
         tituloEsquema.textContent = `Alineación ${formacionActual}`;
@@ -401,14 +614,18 @@
         renderizarBanca();
         actualizarPanelFormulario();
 
+        if (almacenamientoInvalido) {
+            estado.textContent = "Los datos guardados no eran válidos; se cargó una plantilla segura.";
+        }
+
         selectFormacion.addEventListener("change", (e) => cambiarFormacion(e.target.value));
 
         formulario.addEventListener("submit", (e) => {
             e.preventDefault();
             const activo = seleccionadoTitular || seleccionadoBanca;
             if (activo) {
-                activo.nombre = nombreInput.value.trim() || activo.nombre;
-                activo.pos = posicionInput.value.trim() || activo.pos;
+                activo.nombre = limpiarTexto(nombreInput.value, activo.nombre, 20);
+                activo.pos = limpiarTexto(posicionInput.value, activo.pos, 15);
                 guardarStorage();
                 renderizarCancha();
                 renderizarBanca();
@@ -419,7 +636,7 @@
 
         btnCapitan.addEventListener("click", () => {
             const activo = seleccionadoTitular || seleccionadoBanca;
-            if (activo) {
+            if (activo?.esTitular) {
                 asignarCapitan(activo);
             }
         });
@@ -433,6 +650,7 @@
                 historialCambios = [];
                 seleccionadoTitular = null;
                 seleccionadoBanca = null;
+                normalizarPuestosTacticos();
                 cambiarFormacion("4-3-3");
                 estado.textContent = "Alineación y capitán restablecidos por defecto.";
             }
