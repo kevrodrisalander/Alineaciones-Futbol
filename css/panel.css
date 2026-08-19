@@ -15,6 +15,8 @@
     border: 1px solid rgba(255, 255, 255, .08);
     border-radius: 10px;
     background: #0a1e17;
+    color: var(--text);
+    text-align: left;
     cursor: pointer;
     transition: all .15s ease;
 }
@@ -22,6 +24,7 @@
 .banca-item:hover {
     border-color: var(--accent);
     background: #122f25;
+    filter: none;
 }
 
 .banca-item.seleccionado {

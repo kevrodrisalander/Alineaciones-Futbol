@@ -317,9 +317,12 @@
         const suplentes = jugadores.filter(j => !j.esTitular);
 
         suplentes.forEach(jugador => {
-            const item = document.createElement("div");
+            const item = document.createElement("button");
+            item.type = "button";
             item.className = `banca-item ${seleccionadoBanca === jugador ? 'seleccionado' : ''}`;
             item.dataset.numero = jugador.numero;
+            item.setAttribute("aria-pressed", seleccionadoBanca === jugador ? "true" : "false");
+            item.setAttribute("aria-label", `Suplente ${jugador.numero}, ${jugador.nombre}, ${jugador.pos}`);
 
             const dorsal = document.createElement("div");
             dorsal.className = "banca-dorsal";
@@ -371,11 +374,17 @@
             jugador.x = x;
             jugador.y = y;
 
-            const el = document.createElement("div");
+            const el = document.createElement("button");
+            el.type = "button";
             el.className = `jugador ${jugador.pos === 'POR' ? 'portero' : ''} ${seleccionadoTitular === jugador ? 'seleccionado' : ''}`;
             el.dataset.numero = jugador.numero;
             el.style.left = `${x}%`;
             el.style.top = `${y}%`;
+            el.setAttribute("aria-pressed", seleccionadoTitular === jugador ? "true" : "false");
+            el.setAttribute(
+                "aria-label",
+                `Titular ${jugador.numero}, ${jugador.nombre}, ${jugador.pos}${jugador.esCapitan ? ", capitán" : ""}`
+            );
 
             const fueCambiado = historialCambios.some(h => h.entra === jugador.numero);
 
@@ -493,6 +502,10 @@
                 "seleccionado",
                 seleccionadoTitular?.numero === numero
             );
+            el.setAttribute(
+                "aria-pressed",
+                seleccionadoTitular?.numero === numero ? "true" : "false"
+            );
         });
     };
 
@@ -505,11 +518,47 @@
     };
 
     const vincularEventosArrastre = (el, jugador) => {
+        el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                seleccionadoTitular = seleccionadoTitular === jugador ? null : jugador;
+                actualizarSeleccionCancha();
+                actualizarPanelFormulario();
+                return;
+            }
+
+            const desplazamientos = {
+                ArrowLeft: [-1, 0],
+                ArrowRight: [1, 0],
+                ArrowUp: [0, -1],
+                ArrowDown: [0, 1]
+            };
+            const direccion = desplazamientos[e.key];
+            if (!direccion) return;
+
+            e.preventDefault();
+            seleccionadoTitular = jugador;
+            actualizarSeleccionCancha();
+            actualizarPanelFormulario();
+
+            const paso = e.shiftKey ? 5 : 2;
+            const pos = posicionarElemento(
+                el,
+                jugador.x + (direccion[0] * paso),
+                jugador.y + (direccion[1] * paso)
+            );
+            jugador.x = pos.x;
+            jugador.y = pos.y;
+            guardarStorage();
+            estado.textContent = `${jugador.nombre} movido a ${Math.round(pos.x)}%, ${Math.round(pos.y)}%.`;
+        });
+
         el.addEventListener("pointerdown", (e) => {
             if (e.button !== 0) return;
 
             e.preventDefault();
             e.stopPropagation();
+            el.focus({ preventScroll: true });
 
             const yaEstabaSeleccionado = seleccionadoTitular === jugador;
             seleccionadoTitular = jugador;

@@ -85,3 +85,25 @@
     .contenido { grid-template-columns: 1fr; }
     .banca-grid { max-height: 200px; }
 }
+
+@media (max-width: 560px) {
+    .app {
+        width: min(100% - 20px, 1280px);
+        padding-top: 16px;
+    }
+
+    .encabezado {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .marcador-cambios {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .seccion-card {
+        padding: 16px;
+    }
+}

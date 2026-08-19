@@ -26,8 +26,11 @@
 
         <div class="contenido">
             <!-- Cancha de fútbol -->
-            <section class="marco-cancha" aria-label="Cancha de fútbol">
-                <div class="cancha" id="cancha">
+            <section class="marco-cancha" aria-label="Cancha de fútbol" aria-describedby="instrucciones-cancha">
+                <p class="instrucciones-cancha" id="instrucciones-cancha">
+                    Selecciona o arrastra un jugador. Con el teclado, usa las flechas para moverlo.
+                </p>
+                <div class="cancha" id="cancha" role="group" aria-label="Jugadores titulares">
                     <div class="linea"></div>
                     <div class="circulo-central"></div>
                     <div class="area superior"></div>
@@ -86,7 +89,7 @@
                 <div class="acciones">
                     <button class="secundario" id="restablecer" type="button">Restablecer Formación y Cambios</button>
                 </div>
-                <div class="estado" id="estado">Los cambios de nombres y posiciones se guardan automáticamente.</div>
+                <div class="estado" id="estado" role="status" aria-live="polite">Los cambios de nombres y posiciones se guardan automáticamente.</div>
             </aside>
         </div>
     </main>

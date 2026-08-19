@@ -6,6 +6,13 @@
     box-shadow: 0 30px 70px rgba(0, 0, 0, .28);
 }
 
+.instrucciones-cancha {
+    margin: 0 4px 10px;
+    color: var(--muted);
+    font-size: .8rem;
+    line-height: 1.4;
+}
+
 .cancha {
     position: relative;
     width: 100%;
@@ -81,13 +88,27 @@
     z-index: 2;
     width: 14%;
     min-width: 52px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
     outline: none;
+    color: inherit;
+    background: transparent;
+    font-weight: inherit;
     text-align: center;
     cursor: grab;
     transform: translate(-50%, -50%);
     transition: left .4s cubic-bezier(.25, 1, .5, 1), top .4s cubic-bezier(.25, 1, .5, 1);
     user-select: none;
     will-change: left, top;
+}
+
+.jugador:hover {
+    filter: none;
+}
+
+.jugador:focus-visible .ficha {
+    box-shadow: 0 0 0 5px rgba(245, 196, 81, .55), 0 8px 20px rgba(0, 0, 0, .4);
 }
 
 .jugador.arrastrando {
@@ -155,4 +176,18 @@
     color: white;
     background: var(--sub-in);
     font-size: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jugador,
+    .ficha {
+        transition: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .marco-cancha {
+        padding: 8px;
+        border-radius: 18px;
+    }
 }
