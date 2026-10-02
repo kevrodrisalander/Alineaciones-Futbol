@@ -93,3 +93,26 @@
     background: var(--camisa-fondo, var(--accent));
     box-shadow: 0 4px 10px rgba(0, 0, 0, .3);
 }
+
+.etiqueta-grupo {
+    display: block;
+    margin-bottom: 6px;
+    font-size: .8rem;
+    font-weight: 750;
+}
+
+.plantilla-actual {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: .8rem;
+    line-height: 1.4;
+}
+
+.plantilla-actual.desajuste {
+    color: var(--accent);
+}
+
+.acciones-plantilla {
+    display: grid;
+    gap: 8px;
+}

@@ -59,10 +59,24 @@
                     </div>
 
                     <div class="campo-grupo">
-                        <label for="selectCamisa">Camisa del Equipo</label>
+                        <label for="selectLiga">Liga o Competición</label>
+                        <select id="selectLiga"></select>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="selectCamisa">Equipo (Camisa)</label>
                         <div class="selector-camisa">
                             <span class="vista-camisa" id="vistaCamisa" aria-hidden="true"></span>
                             <select id="selectCamisa"></select>
+                        </div>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <span class="etiqueta-grupo">Plantilla</span>
+                        <p class="plantilla-actual" id="textoPlantilla"></p>
+                        <div class="acciones-plantilla">
+                            <button id="btnPlantillaEquipo" class="secundario" type="button">Cargar plantilla del equipo</button>
+                            <button id="btnPlantillaBlanco" class="secundario" type="button">Plantilla en blanco</button>
                         </div>
                     </div>
 
@@ -102,6 +116,8 @@
         </div>
     </main>
 
+    <script src="camisas.js"></script>
+    <script src="plantillas.js"></script>
     <script src="alineacion.js"></script>
 </body>
 </html>

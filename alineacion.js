@@ -84,74 +84,57 @@
         ]
     };
 
-    // Plantilla Inicial con propiedad esCapitan
-    const PLANTILLA_INICIAL = [
-        { numero: 1, nombre: "Courtois", pos: "POR", esTitular: true, esCapitan: false },
-        { numero: 2, nombre: "Carvajal", pos: "LD", esTitular: true, esCapitan: false },
-        { numero: 3, nombre: "E. Militao", pos: "DFC", esTitular: true, esCapitan: false },
-        { numero: 4, nombre: "Alaba", pos: "DFC", esTitular: true, esCapitan: false },
-        { numero: 5, nombre: "Mendy", pos: "LI", esTitular: true, esCapitan: false },
-        { numero: 6, nombre: "Camavinga", pos: "MCD", esTitular: true, esCapitan: false },
-        { numero: 7, pos: "ED", nombre: "Rodrygo", esTitular: true, esCapitan: false },
-        { numero: 8, pos: "MC", nombre: "Kroos", esTitular: true, esCapitan: false },
-        { numero: 9, pos: "DC", nombre: "Mbappé", esTitular: true, esCapitan: false },
-        { numero: 10, pos: "MC", nombre: "Modrić", esTitular: true, esCapitan: true }, // Capitán por defecto
-        { numero: 11, pos: "EI", nombre: "Vinicius Jr.", esTitular: true, esCapitan: false },
+    // Plantillas: las de cada equipo viven en plantillas.js; "blanco" es una plantilla genérica
+    const PLANTILLAS = window.PLANTILLAS_EQUIPO || {};
+    const PLANTILLA_DEFECTO = "real-madrid";
+    const PLANTILLA_BLANCO = "blanco";
+    const NUM_JUGADORES = 24;
+    const ROLES_BASE = ["POR", "LD", "DFC", "DFC", "LI", "MCD", "ED", "MC", "DC", "MC", "EI"];
 
-        { numero: 12, nombre: "Lunin", pos: "POR Suplente", esTitular: false, esCapitan: false },
-        { numero: 13, nombre: "Kepa", pos: "POR Suplente", esTitular: false, esCapitan: false },
-        { numero: 14, nombre: "Nacho", pos: "Central / Def.", esTitular: false, esCapitan: false },
-        { numero: 15, nombre: "Rüdiger", pos: "Central / Def.", esTitular: false, esCapitan: false },
-        { numero: 16, nombre: "Fran García", pos: "Lateral Izq.", esTitular: false, esCapitan: false },
-        { numero: 17, nombre: "Lucas V.", pos: "Lateral / Volante", esTitular: false, esCapitan: false },
-        { numero: 18, nombre: "Tchouaméni", pos: "Pivote / Def.", esTitular: false, esCapitan: false },
-        { numero: 19, nombre: "Ceballos", pos: "Mediocampista", esTitular: false, esCapitan: false },
-        { numero: 20, nombre: "Valverde", pos: "Interior / Ext.", esTitular: false, esCapitan: false },
-        { numero: 21, nombre: "Brahim", pos: "Mediapunta", esTitular: false, esCapitan: false },
-        { numero: 22, nombre: "Arda Güler", pos: "Mediapunta", esTitular: false, esCapitan: false },
-        { numero: 23, nombre: "Joselu", pos: "Delantero", esTitular: false, esCapitan: false },
-        { numero: 24, nombre: "Endrick", pos: "Delantero", esTitular: false, esCapitan: false }
-    ];
+    const plantillaEnBlanco = () => Array.from({ length: NUM_JUGADORES }, (_, i) => {
+        const numero = i + 1;
+        const titular = numero <= 11;
+        return {
+            numero,
+            nombre: titular ? `Jugador ${numero}` : `Suplente ${numero}`,
+            pos: titular ? ROLES_BASE[i] : "Suplente",
+            esTitular: titular,
+            esCapitan: numero === 10,
+            puestoId: titular ? String(numero) : null
+        };
+    });
 
-    // Camisas de equipos (colores aproximados de la equipación titular)
-    // patron: solido | rayas | banda | franja
-    const CAMISAS = {
-        // Clubes
-        "real-madrid":  { nombre: "Real Madrid",     grupo: "Clubes", patron: "solido", c1: "#ffffff", texto: "#1b2a5c", borde: "#d4af37", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "barcelona":    { nombre: "FC Barcelona",    grupo: "Clubes", patron: "rayas",  c1: "#a50044", c2: "#004d98", texto: "#edbb00", borde: "#edbb00", numFondo: "rgba(0, 20, 60, .72)", portero: "#f2c200", porteroTexto: "#1a1a1a" },
-        "atletico":     { nombre: "Atlético de Madrid", grupo: "Clubes", patron: "rayas", c1: "#cb3524", c2: "#ffffff", texto: "#272e61", borde: "#272e61", numFondo: "rgba(255, 255, 255, .9)", portero: "#2ecc71", porteroTexto: "#06210f" },
-        "man-city":     { nombre: "Manchester City", grupo: "Clubes", patron: "solido", c1: "#6cabdd", texto: "#ffffff", borde: "#ffffff", portero: "#1c2c5b", porteroTexto: "#ffffff" },
-        "man-united":   { nombre: "Manchester United", grupo: "Clubes", patron: "solido", c1: "#da291c", texto: "#fbe122", borde: "#fbe122", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "liverpool":    { nombre: "Liverpool",       grupo: "Clubes", patron: "solido", c1: "#c8102e", texto: "#ffffff", borde: "#f6eb61", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "arsenal":      { nombre: "Arsenal",         grupo: "Clubes", patron: "solido", c1: "#ef0107", texto: "#ffffff", borde: "#ffffff", portero: "#2b2b2b", porteroTexto: "#ffffff" },
-        "chelsea":      { nombre: "Chelsea",         grupo: "Clubes", patron: "solido", c1: "#034694", texto: "#ffffff", borde: "#dba111", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "bayern":       { nombre: "Bayern Múnich",   grupo: "Clubes", patron: "solido", c1: "#dc052d", texto: "#ffffff", borde: "#0066b2", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "dortmund":     { nombre: "Borussia Dortmund", grupo: "Clubes", patron: "solido", c1: "#fde100", texto: "#111111", borde: "#111111", portero: "#d81e5b", porteroTexto: "#ffffff" },
-        "psg":          { nombre: "Paris Saint-Germain", grupo: "Clubes", patron: "solido", c1: "#004170", texto: "#ffffff", borde: "#da291c", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "juventus":     { nombre: "Juventus",        grupo: "Clubes", patron: "rayas",  c1: "#ffffff", c2: "#111111", texto: "#ffffff", borde: "#ffffff", numFondo: "rgba(17, 17, 17, .88)", portero: "#ff7a00", porteroTexto: "#1a1a1a" },
-        "milan":        { nombre: "AC Milan",        grupo: "Clubes", patron: "rayas",  c1: "#fb090b", c2: "#111111", texto: "#ffffff", borde: "#ffffff", numFondo: "rgba(0, 0, 0, .6)", portero: "#2ecc71", porteroTexto: "#06210f" },
-        "inter":        { nombre: "Inter de Milán",  grupo: "Clubes", patron: "rayas",  c1: "#0068a8", c2: "#111111", texto: "#ffffff", borde: "#c9a227", numFondo: "rgba(0, 0, 0, .6)", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "boca":         { nombre: "Boca Juniors",    grupo: "Clubes", patron: "banda",  c1: "#0b3a8c", c2: "#f7c600", texto: "#0b2a6b", borde: "#f7c600", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "river":        { nombre: "River Plate",     grupo: "Clubes", patron: "franja", c1: "#ffffff", c2: "#e30613", texto: "#ffffff", borde: "#e30613", numFondo: "rgba(0, 0, 0, .6)", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "america":      { nombre: "Club América",    grupo: "Clubes", patron: "solido", c1: "#ffd400", texto: "#0a2a6b", borde: "#0a2a6b", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "chivas":       { nombre: "Chivas",          grupo: "Clubes", patron: "rayas",  c1: "#d81e2b", c2: "#ffffff", texto: "#0a2a6b", borde: "#0a2a6b", numFondo: "rgba(255, 255, 255, .92)", portero: "#2ecc71", porteroTexto: "#06210f" },
-        "cruz-azul":    { nombre: "Cruz Azul",       grupo: "Clubes", patron: "solido", c1: "#1b4aa0", texto: "#ffffff", borde: "#ffffff", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "pumas":        { nombre: "Pumas UNAM",      grupo: "Clubes", patron: "solido", c1: "#0b2d5b", texto: "#d4af37", borde: "#d4af37", portero: "#2ecc71", porteroTexto: "#06210f" },
-        // Selecciones
-        "mexico":       { nombre: "México",          grupo: "Selecciones", patron: "solido", c1: "#006847", texto: "#ffffff", borde: "#ce1126", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "argentina":    { nombre: "Argentina",       grupo: "Selecciones", patron: "rayas",  c1: "#75aadb", c2: "#ffffff", texto: "#111111", borde: "#f6b40e", numFondo: "rgba(255, 255, 255, .85)", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "brasil":       { nombre: "Brasil",          grupo: "Selecciones", patron: "solido", c1: "#fee100", texto: "#009b3a", borde: "#009b3a", portero: "#1d4ed8", porteroTexto: "#ffffff" },
-        "espana":       { nombre: "España",          grupo: "Selecciones", patron: "solido", c1: "#aa151b", texto: "#f1bf00", borde: "#f1bf00", portero: "#1a1a1a", porteroTexto: "#ffffff" },
-        "alemania":     { nombre: "Alemania",        grupo: "Selecciones", patron: "solido", c1: "#ffffff", texto: "#111111", borde: "#111111", portero: "#2ecc71", porteroTexto: "#06210f" },
-        "francia":      { nombre: "Francia",         grupo: "Selecciones", patron: "solido", c1: "#1b2f6b", texto: "#ffffff", borde: "#ed2939", portero: "#f5c400", porteroTexto: "#1a1a1a" },
-        "italia":       { nombre: "Italia",          grupo: "Selecciones", patron: "solido", c1: "#0e5fb3", texto: "#ffffff", borde: "#ffffff", portero: "#1a1a1a", porteroTexto: "#ffffff" }
+    const obtenerPlantilla = (id) => {
+        const base = id !== PLANTILLA_BLANCO && Object.hasOwn(PLANTILLAS, id)
+            ? PLANTILLAS[id]
+            : plantillaEnBlanco();
+        return JSON.parse(JSON.stringify(base));
     };
+
+    // Catálogo de camisas: los datos viven en camisas.js (agrupados por liga y ordenados)
     const CAMISA_DEFECTO = "real-madrid";
+    const CATALOGO_CAMISAS = window.CATALOGO_CAMISAS || [];
+    const CAMISAS = {};
+    CATALOGO_CAMISAS.forEach(({ grupo, equipos }) => {
+        equipos.forEach(equipo => { CAMISAS[equipo.id] = { ...equipo, grupo }; });
+    });
+    if (!Object.hasOwn(CAMISAS, CAMISA_DEFECTO)) {
+        // Respaldo por si camisas.js no se cargó
+        const respaldo = {
+            id: CAMISA_DEFECTO, nombre: "Real Madrid", patron: "solido", c1: "#ffffff",
+            texto: "#1b2a5c", borde: "#d4af37", portero: "#1a1a1a", porteroTexto: "#ffffff"
+        };
+        CAMISAS[CAMISA_DEFECTO] = { ...respaldo, grupo: "Clubes" };
+        CATALOGO_CAMISAS.push({ grupo: "Clubes", equipos: [respaldo] });
+    }
+
 
     const fondoCamisa = (c) => {
         switch (c.patron) {
             case "rayas":
                 return `linear-gradient(90deg, ${c.c1} 0 20%, ${c.c2} 20% 40%, ${c.c1} 40% 60%, ${c.c2} 60% 80%, ${c.c1} 80%)`;
+            case "aros":
+                return `linear-gradient(${c.c1} 0 20%, ${c.c2} 20% 40%, ${c.c1} 40% 60%, ${c.c2} 60% 80%, ${c.c1} 80%)`;
             case "banda":
                 return `linear-gradient(${c.c1} 0 30%, ${c.c2} 30% 70%, ${c.c1} 70%)`;
             case "franja":
@@ -162,7 +145,8 @@
     };
 
     // Estado
-    let jugadores = JSON.parse(JSON.stringify(PLANTILLA_INICIAL));
+    let plantillaActual = PLANTILLA_DEFECTO;
+    let jugadores = obtenerPlantilla(plantillaActual);
     let formacionActual = "4-3-3";
     let camisaActual = CAMISA_DEFECTO;
     let cambiosRealizados = 0;
@@ -177,7 +161,11 @@
     const cancha = document.getElementById("cancha");
     const bancaGrid = document.getElementById("bancaGrid");
     const selectFormacion = document.getElementById("selectFormacion");
+    const selectLiga = document.getElementById("selectLiga");
     const selectCamisa = document.getElementById("selectCamisa");
+    const textoPlantilla = document.getElementById("textoPlantilla");
+    const btnPlantillaEquipo = document.getElementById("btnPlantillaEquipo");
+    const btnPlantillaBlanco = document.getElementById("btnPlantillaBlanco");
     const formulario = document.getElementById("formulario");
     const nombreInput = document.getElementById("nombreJugador");
     const posicionInput = document.getElementById("posicionJugador");
@@ -194,6 +182,7 @@
             jugadores,
             formacionActual,
             camisa: camisaActual,
+            plantilla: plantillaActual,
             cambiosRealizados,
             historialCambios
         };
@@ -215,7 +204,7 @@
             return null;
         }
 
-        if (data.jugadores.length !== PLANTILLA_INICIAL.length) return null;
+        if (data.jugadores.length !== NUM_JUGADORES) return null;
 
         const dorsales = new Set();
         const jugadoresValidos = [];
@@ -282,6 +271,9 @@
             jugadores: jugadoresValidos,
             formacionActual: formacion,
             camisa: Object.hasOwn(CAMISAS, data.camisa) ? data.camisa : CAMISA_DEFECTO,
+            plantilla: data.plantilla === PLANTILLA_BLANCO || Object.hasOwn(PLANTILLAS, data.plantilla)
+                ? data.plantilla
+                : PLANTILLA_DEFECTO,
             cambiosRealizados: Math.max(contador, historial.length),
             historialCambios: historial
         };
@@ -301,6 +293,7 @@
             jugadores = data.jugadores;
             formacionActual = data.formacionActual;
             camisaActual = data.camisa;
+            plantillaActual = data.plantilla;
             cambiosRealizados = data.cambiosRealizados;
             historialCambios = data.historialCambios;
         } catch (e) {
@@ -376,19 +369,73 @@
         raiz.setProperty("--portero-texto", camisa.porteroTexto);
     };
 
-    const poblarSelectCamisa = () => {
-        const grupos = {};
-        Object.entries(CAMISAS).forEach(([id, camisa]) => {
-            if (!grupos[camisa.grupo]) {
-                grupos[camisa.grupo] = document.createElement("optgroup");
-                grupos[camisa.grupo].label = camisa.grupo;
-            }
+    const indiceLigaDeCamisa = (id) => {
+        const indice = CATALOGO_CAMISAS.findIndex(({ equipos }) => equipos.some(e => e.id === id));
+        return indice >= 0 ? indice : 0;
+    };
+
+    const poblarSelectLiga = () => {
+        const opciones = CATALOGO_CAMISAS.map(({ grupo }, indice) => {
             const opcion = document.createElement("option");
-            opcion.value = id;
-            opcion.textContent = camisa.nombre;
-            grupos[camisa.grupo].append(opcion);
+            opcion.value = String(indice);
+            opcion.textContent = grupo;
+            return opcion;
         });
-        selectCamisa.replaceChildren(...Object.values(grupos));
+        selectLiga.replaceChildren(...opciones);
+    };
+
+    // Llena el selector de equipos con los de la liga indicada (ya vienen ordenados A-Z)
+    const poblarSelectEquipos = (indiceLiga) => {
+        const liga = CATALOGO_CAMISAS[indiceLiga];
+        if (!liga) return;
+        const opciones = liga.equipos.map(equipo => {
+            const opcion = document.createElement("option");
+            opcion.value = equipo.id;
+            opcion.textContent = equipo.nombre;
+            return opcion;
+        });
+        selectCamisa.replaceChildren(...opciones);
+    };
+
+    const cambiarLiga = (indiceLiga) => {
+        const liga = CATALOGO_CAMISAS[Number(indiceLiga)];
+        if (!liga) return;
+        poblarSelectEquipos(Number(indiceLiga));
+        // Al cambiar de liga se aplica el primer equipo de la lista para que el cambio sea visible
+        cambiarCamisa(liga.equipos[0].id);
+    };
+
+    const nombrePlantilla = (id) =>
+        id === PLANTILLA_BLANCO ? "En blanco" : (CAMISAS[id]?.nombre || id);
+
+    const actualizarPanelPlantilla = () => {
+        const equipoCamisa = CAMISAS[camisaActual]?.nombre || "";
+        const hayPlantilla = Object.hasOwn(PLANTILLAS, camisaActual);
+        const noCoincide = plantillaActual !== PLANTILLA_BLANCO && plantillaActual !== camisaActual;
+
+        textoPlantilla.textContent = `Plantilla actual: ${nombrePlantilla(plantillaActual)}.`
+            + (noCoincide ? " No coincide con la camisa elegida." : "");
+        textoPlantilla.classList.toggle("desajuste", noCoincide);
+
+        btnPlantillaEquipo.disabled = !hayPlantilla;
+        btnPlantillaEquipo.textContent = hayPlantilla
+            ? `Cargar plantilla de ${equipoCamisa}`
+            : `Sin plantilla guardada de ${equipoCamisa}`;
+    };
+
+    const cargarPlantilla = (id) => {
+        jugadores = obtenerPlantilla(id);
+        plantillaActual = id;
+        cambiosRealizados = 0;
+        historialCambios = [];
+        seleccionadoTitular = null;
+        seleccionadoBanca = null;
+        // Reubica a los titulares según la formación actual, guarda y vuelve a dibujar todo
+        cambiarFormacion(formacionActual);
+        actualizarPanelPlantilla();
+        estado.textContent = id === PLANTILLA_BLANCO
+            ? "Plantilla en blanco cargada: edita cada jugador para poner tus nombres."
+            : `Plantilla de ${nombrePlantilla(id)} cargada.`;
     };
 
     const cambiarCamisa = (id) => {
@@ -398,6 +445,7 @@
         aplicarCamisa(id);
         guardarStorage();
         estado.textContent = `Camisa de ${CAMISAS[id].nombre} aplicada.`;
+        actualizarPanelPlantilla();
     };
 
     const renderizarBanca = () => {
@@ -751,15 +799,20 @@
         guardarStorage();
         renderizarCancha();
         renderizarBanca();
+        actualizarPanelFormulario();
     };
 
     const init = () => {
         cargarStorage();
         normalizarPuestosTacticos();
         
-        poblarSelectCamisa();
+        const ligaInicial = indiceLigaDeCamisa(camisaActual);
+        poblarSelectLiga();
+        selectLiga.value = String(ligaInicial);
+        poblarSelectEquipos(ligaInicial);
         selectCamisa.value = camisaActual;
         aplicarCamisa(camisaActual);
+        actualizarPanelPlantilla();
 
         selectFormacion.value = formacionActual;
         tituloEsquema.textContent = `Alineación ${formacionActual}`;
@@ -773,6 +826,7 @@
         }
 
         selectFormacion.addEventListener("change", (e) => cambiarFormacion(e.target.value));
+        selectLiga.addEventListener("change", (e) => cambiarLiga(e.target.value));
         selectCamisa.addEventListener("change", (e) => cambiarCamisa(e.target.value));
 
         formulario.addEventListener("submit", (e) => {
@@ -798,9 +852,22 @@
 
         btnSustituir.addEventListener("click", efectuarSustitucion);
 
+        btnPlantillaEquipo.addEventListener("click", () => {
+            if (!Object.hasOwn(PLANTILLAS, camisaActual)) return;
+            if (confirm(`Se cargará la plantilla de ${nombrePlantilla(camisaActual)}. Se reemplazarán los nombres, los cambios realizados y el capitán. ¿Continuar?`)) {
+                cargarPlantilla(camisaActual);
+            }
+        });
+
+        btnPlantillaBlanco.addEventListener("click", () => {
+            if (confirm("Se cargará una plantilla en blanco. Se reemplazarán los nombres, los cambios realizados y el capitán. ¿Continuar?")) {
+                cargarPlantilla(PLANTILLA_BLANCO);
+            }
+        });
+
         restablecerBtn.addEventListener("click", () => {
             if (confirm("¿Deseas restablecer la plantilla, los 5 cambios y la formación original?")) {
-                jugadores = JSON.parse(JSON.stringify(PLANTILLA_INICIAL));
+                jugadores = obtenerPlantilla(plantillaActual);
                 cambiosRealizados = 0;
                 historialCambios = [];
                 seleccionadoTitular = null;
