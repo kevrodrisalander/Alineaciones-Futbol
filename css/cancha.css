@@ -98,13 +98,20 @@
     text-align: center;
     cursor: grab;
     transform: translate(-50%, -50%);
-    transition: left .4s cubic-bezier(.25, 1, .5, 1), top .4s cubic-bezier(.25, 1, .5, 1);
+    transition: left .08s ease-out, top .08s ease-out;
     user-select: none;
     will-change: left, top;
 }
 
 .jugador:hover {
     filter: none;
+}
+
+/* Zona de agarre ampliada para dedos y cursor */
+.jugador::before {
+    position: absolute;
+    inset: -8px;
+    content: "";
 }
 
 .jugador:focus-visible .ficha {
@@ -125,10 +132,10 @@
     max-width: 85%;
     aspect-ratio: 1;
     margin: auto;
-    border: 3px solid white;
+    border: 3px solid var(--camisa-borde, white);
     border-radius: 50%;
-    color: #071d16;
-    background: var(--accent);
+    color: var(--camisa-texto, #071d16);
+    background: var(--camisa-fondo, var(--accent));
     box-shadow: 0 7px 18px rgba(0, 0, 0, .34);
     font-size: clamp(.8rem, 2vw, 1.05rem);
     font-weight: 900;
@@ -136,14 +143,32 @@
 }
 
 .jugador.portero .ficha {
-    color: #022b3a;
-    background: #29b6f6;
+    color: var(--portero-texto, #022b3a);
+    background: var(--portero-fondo, #29b6f6);
+}
+
+.dorsal-num {
+    display: grid;
+    place-items: center;
+    min-width: 1.6em;
+    padding: 0 .3em;
+    border-radius: 999px;
+    background: var(--camisa-num-fondo, transparent);
+    line-height: 1.5;
+}
+
+.jugador.portero .dorsal-num {
+    background: transparent;
 }
 
 .nombre {
-    display: inline-block;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    display: block;
+    width: max-content;
     max-width: 120%;
-    margin-top: 4px;
+    transform: translateX(-50%);
     overflow: hidden;
     padding: 2px 6px;
     border-radius: 999px;
@@ -157,9 +182,8 @@
 }
 
 .jugador.seleccionado .ficha {
-    color: white;
-    background: #ed713b;
-    box-shadow: 0 0 0 5px rgba(245, 196, 81, .5), 0 8px 20px rgba(0, 0, 0, .4);
+    transform: scale(1.12);
+    box-shadow: 0 0 0 5px rgba(245, 196, 81, .85), 0 8px 20px rgba(0, 0, 0, .4);
 }
 
 .indicador-sub {

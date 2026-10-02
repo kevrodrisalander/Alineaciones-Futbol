@@ -113,9 +113,58 @@
         { numero: 24, nombre: "Endrick", pos: "Delantero", esTitular: false, esCapitan: false }
     ];
 
+    // Camisas de equipos (colores aproximados de la equipación titular)
+    // patron: solido | rayas | banda | franja
+    const CAMISAS = {
+        // Clubes
+        "real-madrid":  { nombre: "Real Madrid",     grupo: "Clubes", patron: "solido", c1: "#ffffff", texto: "#1b2a5c", borde: "#d4af37", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "barcelona":    { nombre: "FC Barcelona",    grupo: "Clubes", patron: "rayas",  c1: "#a50044", c2: "#004d98", texto: "#edbb00", borde: "#edbb00", numFondo: "rgba(0, 20, 60, .72)", portero: "#f2c200", porteroTexto: "#1a1a1a" },
+        "atletico":     { nombre: "Atlético de Madrid", grupo: "Clubes", patron: "rayas", c1: "#cb3524", c2: "#ffffff", texto: "#272e61", borde: "#272e61", numFondo: "rgba(255, 255, 255, .9)", portero: "#2ecc71", porteroTexto: "#06210f" },
+        "man-city":     { nombre: "Manchester City", grupo: "Clubes", patron: "solido", c1: "#6cabdd", texto: "#ffffff", borde: "#ffffff", portero: "#1c2c5b", porteroTexto: "#ffffff" },
+        "man-united":   { nombre: "Manchester United", grupo: "Clubes", patron: "solido", c1: "#da291c", texto: "#fbe122", borde: "#fbe122", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "liverpool":    { nombre: "Liverpool",       grupo: "Clubes", patron: "solido", c1: "#c8102e", texto: "#ffffff", borde: "#f6eb61", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "arsenal":      { nombre: "Arsenal",         grupo: "Clubes", patron: "solido", c1: "#ef0107", texto: "#ffffff", borde: "#ffffff", portero: "#2b2b2b", porteroTexto: "#ffffff" },
+        "chelsea":      { nombre: "Chelsea",         grupo: "Clubes", patron: "solido", c1: "#034694", texto: "#ffffff", borde: "#dba111", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "bayern":       { nombre: "Bayern Múnich",   grupo: "Clubes", patron: "solido", c1: "#dc052d", texto: "#ffffff", borde: "#0066b2", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "dortmund":     { nombre: "Borussia Dortmund", grupo: "Clubes", patron: "solido", c1: "#fde100", texto: "#111111", borde: "#111111", portero: "#d81e5b", porteroTexto: "#ffffff" },
+        "psg":          { nombre: "Paris Saint-Germain", grupo: "Clubes", patron: "solido", c1: "#004170", texto: "#ffffff", borde: "#da291c", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "juventus":     { nombre: "Juventus",        grupo: "Clubes", patron: "rayas",  c1: "#ffffff", c2: "#111111", texto: "#ffffff", borde: "#ffffff", numFondo: "rgba(17, 17, 17, .88)", portero: "#ff7a00", porteroTexto: "#1a1a1a" },
+        "milan":        { nombre: "AC Milan",        grupo: "Clubes", patron: "rayas",  c1: "#fb090b", c2: "#111111", texto: "#ffffff", borde: "#ffffff", numFondo: "rgba(0, 0, 0, .6)", portero: "#2ecc71", porteroTexto: "#06210f" },
+        "inter":        { nombre: "Inter de Milán",  grupo: "Clubes", patron: "rayas",  c1: "#0068a8", c2: "#111111", texto: "#ffffff", borde: "#c9a227", numFondo: "rgba(0, 0, 0, .6)", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "boca":         { nombre: "Boca Juniors",    grupo: "Clubes", patron: "banda",  c1: "#0b3a8c", c2: "#f7c600", texto: "#0b2a6b", borde: "#f7c600", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "river":        { nombre: "River Plate",     grupo: "Clubes", patron: "franja", c1: "#ffffff", c2: "#e30613", texto: "#ffffff", borde: "#e30613", numFondo: "rgba(0, 0, 0, .6)", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "america":      { nombre: "Club América",    grupo: "Clubes", patron: "solido", c1: "#ffd400", texto: "#0a2a6b", borde: "#0a2a6b", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "chivas":       { nombre: "Chivas",          grupo: "Clubes", patron: "rayas",  c1: "#d81e2b", c2: "#ffffff", texto: "#0a2a6b", borde: "#0a2a6b", numFondo: "rgba(255, 255, 255, .92)", portero: "#2ecc71", porteroTexto: "#06210f" },
+        "cruz-azul":    { nombre: "Cruz Azul",       grupo: "Clubes", patron: "solido", c1: "#1b4aa0", texto: "#ffffff", borde: "#ffffff", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "pumas":        { nombre: "Pumas UNAM",      grupo: "Clubes", patron: "solido", c1: "#0b2d5b", texto: "#d4af37", borde: "#d4af37", portero: "#2ecc71", porteroTexto: "#06210f" },
+        // Selecciones
+        "mexico":       { nombre: "México",          grupo: "Selecciones", patron: "solido", c1: "#006847", texto: "#ffffff", borde: "#ce1126", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "argentina":    { nombre: "Argentina",       grupo: "Selecciones", patron: "rayas",  c1: "#75aadb", c2: "#ffffff", texto: "#111111", borde: "#f6b40e", numFondo: "rgba(255, 255, 255, .85)", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "brasil":       { nombre: "Brasil",          grupo: "Selecciones", patron: "solido", c1: "#fee100", texto: "#009b3a", borde: "#009b3a", portero: "#1d4ed8", porteroTexto: "#ffffff" },
+        "espana":       { nombre: "España",          grupo: "Selecciones", patron: "solido", c1: "#aa151b", texto: "#f1bf00", borde: "#f1bf00", portero: "#1a1a1a", porteroTexto: "#ffffff" },
+        "alemania":     { nombre: "Alemania",        grupo: "Selecciones", patron: "solido", c1: "#ffffff", texto: "#111111", borde: "#111111", portero: "#2ecc71", porteroTexto: "#06210f" },
+        "francia":      { nombre: "Francia",         grupo: "Selecciones", patron: "solido", c1: "#1b2f6b", texto: "#ffffff", borde: "#ed2939", portero: "#f5c400", porteroTexto: "#1a1a1a" },
+        "italia":       { nombre: "Italia",          grupo: "Selecciones", patron: "solido", c1: "#0e5fb3", texto: "#ffffff", borde: "#ffffff", portero: "#1a1a1a", porteroTexto: "#ffffff" }
+    };
+    const CAMISA_DEFECTO = "real-madrid";
+
+    const fondoCamisa = (c) => {
+        switch (c.patron) {
+            case "rayas":
+                return `linear-gradient(90deg, ${c.c1} 0 20%, ${c.c2} 20% 40%, ${c.c1} 40% 60%, ${c.c2} 60% 80%, ${c.c1} 80%)`;
+            case "banda":
+                return `linear-gradient(${c.c1} 0 30%, ${c.c2} 30% 70%, ${c.c1} 70%)`;
+            case "franja":
+                return `linear-gradient(135deg, ${c.c1} 0 38%, ${c.c2} 38% 62%, ${c.c1} 62%)`;
+            default:
+                return c.c1;
+        }
+    };
+
     // Estado
     let jugadores = JSON.parse(JSON.stringify(PLANTILLA_INICIAL));
     let formacionActual = "4-3-3";
+    let camisaActual = CAMISA_DEFECTO;
     let cambiosRealizados = 0;
     let historialCambios = [];
     let seleccionadoTitular = null;
@@ -128,6 +177,7 @@
     const cancha = document.getElementById("cancha");
     const bancaGrid = document.getElementById("bancaGrid");
     const selectFormacion = document.getElementById("selectFormacion");
+    const selectCamisa = document.getElementById("selectCamisa");
     const formulario = document.getElementById("formulario");
     const nombreInput = document.getElementById("nombreJugador");
     const posicionInput = document.getElementById("posicionJugador");
@@ -143,6 +193,7 @@
         const data = {
             jugadores,
             formacionActual,
+            camisa: camisaActual,
             cambiosRealizados,
             historialCambios
         };
@@ -230,6 +281,7 @@
         return {
             jugadores: jugadoresValidos,
             formacionActual: formacion,
+            camisa: Object.hasOwn(CAMISAS, data.camisa) ? data.camisa : CAMISA_DEFECTO,
             cambiosRealizados: Math.max(contador, historial.length),
             historialCambios: historial
         };
@@ -248,6 +300,7 @@
 
             jugadores = data.jugadores;
             formacionActual = data.formacionActual;
+            camisaActual = data.camisa;
             cambiosRealizados = data.cambiosRealizados;
             historialCambios = data.historialCambios;
         } catch (e) {
@@ -310,6 +363,41 @@
         renderizarCancha();
         renderizarBanca();
         actualizarPanelFormulario();
+    };
+
+    const aplicarCamisa = (id) => {
+        const camisa = CAMISAS[id] || CAMISAS[CAMISA_DEFECTO];
+        const raiz = document.documentElement.style;
+        raiz.setProperty("--camisa-fondo", fondoCamisa(camisa));
+        raiz.setProperty("--camisa-texto", camisa.texto);
+        raiz.setProperty("--camisa-borde", camisa.borde);
+        raiz.setProperty("--camisa-num-fondo", camisa.numFondo || "transparent");
+        raiz.setProperty("--portero-fondo", camisa.portero);
+        raiz.setProperty("--portero-texto", camisa.porteroTexto);
+    };
+
+    const poblarSelectCamisa = () => {
+        const grupos = {};
+        Object.entries(CAMISAS).forEach(([id, camisa]) => {
+            if (!grupos[camisa.grupo]) {
+                grupos[camisa.grupo] = document.createElement("optgroup");
+                grupos[camisa.grupo].label = camisa.grupo;
+            }
+            const opcion = document.createElement("option");
+            opcion.value = id;
+            opcion.textContent = camisa.nombre;
+            grupos[camisa.grupo].append(opcion);
+        });
+        selectCamisa.replaceChildren(...Object.values(grupos));
+    };
+
+    const cambiarCamisa = (id) => {
+        if (!Object.hasOwn(CAMISAS, id)) return;
+        camisaActual = id;
+        selectCamisa.value = id;
+        aplicarCamisa(id);
+        guardarStorage();
+        estado.textContent = `Camisa de ${CAMISAS[id].nombre} aplicada.`;
     };
 
     const renderizarBanca = () => {
@@ -390,7 +478,10 @@
 
             const ficha = document.createElement("div");
             ficha.className = "ficha";
-            ficha.append(document.createTextNode(jugador.numero));
+            const dorsalNum = document.createElement("span");
+            dorsalNum.className = "dorsal-num";
+            dorsalNum.textContent = jugador.numero;
+            ficha.append(dorsalNum);
             if (fueCambiado) {
                 const indicador = document.createElement("span");
                 indicador.className = "indicador-sub";
@@ -541,10 +632,13 @@
             actualizarSeleccionCancha();
             actualizarPanelFormulario();
 
-            const paso = e.shiftKey ? 5 : 2;
+            // 1% en X no mide lo mismo que 1% en Y; se compensa para que el paso sea igual en pantalla
+            const rect = cancha.getBoundingClientRect();
+            const paso = e.shiftKey ? 5 : 1;
+            const pasoX = paso * (rect.height / rect.width);
             const pos = posicionarElemento(
                 el,
-                jugador.x + (direccion[0] * paso),
+                jugador.x + (direccion[0] * pasoX),
                 jugador.y + (direccion[1] * paso)
             );
             jugador.x = pos.x;
@@ -565,6 +659,10 @@
             actualizarSeleccionCancha();
             actualizarPanelFormulario();
 
+            const rectInicio = cancha.getBoundingClientRect();
+            const punteroX = ((e.clientX - rectInicio.left) / rectInicio.width) * 100;
+            const punteroY = ((e.clientY - rectInicio.top) / rectInicio.height) * 100;
+
             el.classList.add("arrastrando");
             el.setPointerCapture(e.pointerId);
             arrastre = {
@@ -573,6 +671,9 @@
                 pointerId: e.pointerId,
                 inicioX: e.clientX,
                 inicioY: e.clientY,
+                // Distancia entre el centro de la ficha y el punto exacto donde se agarró
+                desfaseX: jugador.x - punteroX,
+                desfaseY: jugador.y - punteroY,
                 x: null,
                 y: null,
                 movido: false,
@@ -592,8 +693,8 @@
             arrastre.movido = true;
 
             const rect = cancha.getBoundingClientRect();
-            arrastre.x = ((e.clientX - rect.left) / rect.width) * 100;
-            arrastre.y = ((e.clientY - rect.top) / rect.height) * 100;
+            arrastre.x = ((e.clientX - rect.left) / rect.width) * 100 + arrastre.desfaseX;
+            arrastre.y = ((e.clientY - rect.top) / rect.height) * 100 + arrastre.desfaseY;
 
             if (!tickFrame) {
                 tickFrame = requestAnimationFrame(() => {
@@ -656,6 +757,10 @@
         cargarStorage();
         normalizarPuestosTacticos();
         
+        poblarSelectCamisa();
+        selectCamisa.value = camisaActual;
+        aplicarCamisa(camisaActual);
+
         selectFormacion.value = formacionActual;
         tituloEsquema.textContent = `Alineación ${formacionActual}`;
 
@@ -668,6 +773,7 @@
         }
 
         selectFormacion.addEventListener("change", (e) => cambiarFormacion(e.target.value));
+        selectCamisa.addEventListener("change", (e) => cambiarCamisa(e.target.value));
 
         formulario.addEventListener("submit", (e) => {
             e.preventDefault();
